@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ikul Flashcard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%90%B1%3C/text%3E%3C/svg%3E">
 <style>
 :root{--bg:#fdf8f0;--surface:#fffdf9;--text:#2b2420;--muted:#7a6a5d;--accent:#c96a1b;--accent-t:#fff;--back:#fdeedc;--line:#ecdcc8;--danger:#b02a2a;--ok:#2b8a3e;--p1:rgba(232,135,58,.35);--p2:rgba(43,36,32,.14);color-scheme:light;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -18,6 +19,7 @@ h1{font-size:1.4rem;margin:0}h3{margin:0 0 4px;font-size:1.05rem}h2{margin:6px 0
 .sub{color:var(--muted);margin:0 0 16px;font-size:.9rem}
 :root[data-theme="light"]{--bg:#fff;--surface:#fff;--text:#2b2420;--muted:#7a6a5d;--accent:#c96a1b;--accent-t:#fff;--back:#fff4e6;--line:#eadfd2;--danger:#b02a2a;--ok:#2b8a3e;--p1:rgba(232,135,58,.22);--p2:rgba(43,36,32,.08);color-scheme:light}
 .theme{margin-left:auto;display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}.theme button{border:0;background:none;color:var(--muted);font:inherit;font-size:.8rem;padding:5px 10px;border-radius:999px;cursor:pointer}.theme button.on{background:var(--accent);color:var(--accent-t)}
+.acct{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:-6px 0 14px;flex-wrap:wrap}.sync{font-size:.78rem;color:var(--muted);flex:1;min-width:160px}#uname{font-size:.85rem;color:var(--muted);margin-right:6px}
 .tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:16px}
 .tab{flex:1;border:0;background:none;color:var(--muted);font:inherit;padding:9px;border-radius:9px;cursor:pointer;font-weight:600}
 .tab.on{background:var(--accent);color:var(--accent-t)}
@@ -64,7 +66,7 @@ textarea{resize:vertical;min-height:60px}
 <main>
 <div class="brand"><svg viewBox="0 0 80 80" aria-hidden="true"><defs><clipPath id="hc"><ellipse cx="40" cy="46" rx="29" ry="25"/></clipPath></defs><path d="M13 34 L15 7 L35 22Z" fill="#e8873a"/><path d="M67 34 L65 7 L45 22Z" fill="#2b2420"/><path d="M18 28 L19 14 L28 22Z" fill="#f4b6b6"/><path d="M62 28 L61 14 L52 22Z" fill="#f4b6b6"/><ellipse cx="40" cy="46" rx="29" ry="25" fill="#fffaf2" stroke="#ecdcc8"/><g clip-path="url(#hc)"><circle cx="16" cy="40" r="17" fill="#e8873a"/><path d="M52 18 h30 v30 h-14 q-6 -8 -16 -10z" fill="#2b2420"/><circle cx="52" cy="72" r="9" fill="#e8873a"/></g><ellipse cx="29" cy="46" rx="3.6" ry="4.6" fill="#2b2420"/><ellipse cx="51" cy="46" rx="3.6" ry="4.6" fill="#2b2420"/><circle cx="30.2" cy="44.5" r="1.3" fill="#fff"/><circle cx="52.2" cy="44.5" r="1.3" fill="#fff"/><path d="M37 53 h6 l-3 4z" fill="#f08a8a"/><path d="M40 57 q-3 4 -7 2 M40 57 q3 4 7 2" fill="none" stroke="#2b2420" stroke-width="1.6" stroke-linecap="round"/><path d="M18 52 l-10 -2 M18 56 l-10 3 M62 52 l10 -2 M62 56 l10 3" stroke="#2b2420" stroke-width="1.4" stroke-linecap="round"/></svg><div><h1>Ikul</h1><small>Flashcard</small></div><div class="theme" role="group" aria-label="Pilih tema"><button data-th="light">☀️ Day</button><button data-th="dark">🌙 Dark</button></div></div>
 <p class="sub">🐾 Kelompokkan kartu dalam folder, lalu latihan dari satu atau beberapa folder.</p>
-<div id="app"></div>
+<div class="acct"><div class="sync" id="sync"></div><div id="authBox"><button class="btn sm primary" id="loginBtn">Masuk dengan Google</button><span id="userBox" hidden><span id="uname"></span> <button class="btn sm" id="logoutBtn">Keluar</button></span></div></div><div id="app"></div>
 </main>
 <script>
 (function(){
@@ -80,7 +82,7 @@ function load(){
  .concat(mk([['embrace','Learn to embrace change.','merangkul; menerima','Belajarlah menerima perubahan.'],['procrastinate','Don’t procrastinate on your homework.','menunda-nunda','Jangan menunda-nunda PR-mu.']],f2))}
 }
 var D=load(),ui={tab:'folders',sel:{},shuf:true,s:null,edit:null,lastF:null};
-function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+function save(){D.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}push()}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function cnt(f){return D.cards.filter(function(c){return c.folder===f}).length}
 function card(id){return D.cards.filter(function(c){return c.id===id})[0]}
@@ -183,8 +185,90 @@ app.addEventListener('click',function(e){
   save();render();break;
  }
 });
+var syncEl=document.getElementById('sync');
+function setSync(t){syncEl.textContent=t}
+function push(){if(window.pushCloud)window.pushCloud()}
+window.ikul={get:function(){return D},set:function(d){D=d;try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}ui.s=null;ui.edit=null;ui.sel={};render()},status:setSync};
+setSync('\ud83d\udcbe Tersimpan di browser ini. Masuk dengan Google untuk menyimpan ke akunmu.');
 render();
 })();
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA3I10N_G-SsIqzQMl2XPaOzuKdMcFA4mQ",
+  authDomain: "my-flashcard-a1cb6.firebaseapp.com",
+  projectId: "my-flashcard-a1cb6",
+  storageBucket: "my-flashcard-a1cb6.firebasestorage.app",
+  messagingSenderId: "23306322885",
+  appId: "1:23306322885:web:68700571b8fc72411a01ac",
+  measurementId: "G-XD76BET5C4"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = (id) => document.getElementById(id);
+const GUEST = "\ud83d\udcbe Tersimpan di browser ini. Masuk dengan Google untuk menyimpan ke akunmu.";
+let user = null, tmr = null;
+
+async function writeNow() {
+  const d = window.ikul.get();
+  await setDoc(doc(db, "users", user.uid), { json: JSON.stringify(d), updated: d.updated || Date.now() });
+}
+
+window.pushCloud = () => {
+  if (!user) return;
+  clearTimeout(tmr);
+  tmr = setTimeout(async () => {
+    try { await writeNow(); window.ikul.status("\u2601\ufe0f Tersimpan di akun Google kamu"); }
+    catch (e) { console.error(e); window.ikul.status("\u26a0\ufe0f Gagal sinkron ke cloud. Data tetap aman di browser ini."); }
+  }, 700);
+};
+
+$("loginBtn").onclick = async () => {
+  try { await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch (e) { console.error(e); window.ikul.status("\u26a0\ufe0f Login dibatalkan atau gagal. Coba lagi."); }
+};
+
+$("logoutBtn").onclick = async () => {
+  try { clearTimeout(tmr); if (user) await writeNow(); } catch (e) { console.error(e); }
+  await signOut(auth);
+  try { localStorage.removeItem("flashcards-v2"); } catch (e) {}
+  location.reload();
+};
+
+onAuthStateChanged(auth, async (u) => {
+  user = u;
+  $("loginBtn").hidden = !!u;
+  $("userBox").hidden = !u;
+  if (!u) { window.ikul.status(GUEST); return; }
+  $("uname").textContent = (u.displayName || u.email || "").split(" ")[0];
+  window.ikul.status("\u2601\ufe0f Menyinkronkan\u2026");
+  try {
+    const ref = doc(db, "users", u.uid);
+    const snap = await getDoc(ref);
+    const local = window.ikul.get();
+    if (snap.exists()) {
+      const d = snap.data();
+      const cloud = JSON.parse(d.json);
+      if (cloud && cloud.folders && cloud.cards && (d.updated || 0) > (local.updated || 0)) {
+        cloud.updated = d.updated;
+        window.ikul.set(cloud);
+        window.ikul.status("\u2601\ufe0f Tersinkron dengan akun Google kamu");
+        return;
+      }
+    }
+    await writeNow();
+    window.ikul.status("\u2601\ufe0f Tersimpan di akun Google kamu");
+  } catch (e) {
+    console.error(e);
+    window.ikul.status("\u26a0\ufe0f Cloud tidak bisa dihubungi (cek aturan Firestore). Data tetap aman di browser ini.");
+  }
+});
 </script>
 </body>
 </html>
